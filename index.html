@@ -320,6 +320,50 @@
   }
   .map-tooltip.show{display:flex;}
   .map-tooltip small{color:var(--ink-soft); font-weight:600; font-size:10px;}
+
+  /* ---------- Chat room ---------- */
+  .chat-room-trigger{cursor:pointer;}
+  .chat-content{padding-top:14px; padding-bottom:150px;}
+  .msg-row{display:flex; align-items:flex-end; gap:8px; margin-bottom:14px;}
+  .msg-row.own{flex-direction:row-reverse;}
+  .msg-avatar{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:var(--seafoam); color:var(--ocean);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:11px;
+  }
+  .msg-col{display:flex; flex-direction:column; max-width:74%;}
+  .msg-row.own .msg-col{align-items:flex-end;}
+  .msg-sender{font-size:10.5px; font-weight:800; color:var(--ocean); margin:0 2px 3px;}
+  .msg-bubble{
+    padding:9px 13px; border-radius:16px; font-size:12.5px; line-height:1.55;
+    background:var(--foam); color:var(--ink);
+    box-shadow:0 6px 14px -10px rgba(10,61,82,.3);
+    border-end-start-radius:4px;
+  }
+  .msg-row.own .msg-bubble{
+    background:linear-gradient(135deg,var(--deep-navy),var(--ocean));
+    color:#fff; border-end-start-radius:16px; border-end-end-radius:4px;
+  }
+  .msg-time{font-size:9px; color:var(--ink-soft); margin:4px 4px 0;}
+
+  .chat-input-bar{
+    position:fixed; bottom:82px; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px; z-index:9;
+    background:var(--foam);
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px; box-shadow:0 -8px 20px -16px rgba(10,61,82,.35);
+  }
+  .chat-input-bar input{
+    flex:1; border:none; outline:none; background:var(--sand);
+    border-radius:20px; padding:11px 16px; font-family:'Tajawal',sans-serif;
+    font-size:12.5px; color:var(--ink);
+  }
+  .chat-send-btn{
+    width:38px; height:38px; border-radius:50%; flex-shrink:0; border:none;
+    background:linear-gradient(135deg,var(--deep-navy),var(--ocean)); color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -633,11 +677,39 @@
       </div>
 
       <div class="divider-label" data-en="Community chat">مجتمع الدردشة</div>
-      <div class="list-item">
+      <div class="list-item chat-room-trigger" data-room="argentina">
         <div class="list-icon"><i data-lucide="message-circle" width="19" height="19"></i></div>
         <div class="list-text"><h4 data-en="Argentina Room 🇦🇷">غرفة الأرجنتين 🇦🇷</h4><span data-en="214 travelers active now">214 مسافر نشط الآن</span></div>
         <div class="list-meta"><b>12</b><small data-en="new messages">رسالة جديدة</small></div>
       </div>
+      <div class="list-item chat-room-trigger" data-room="istanbul">
+        <div class="list-icon coral"><i data-lucide="message-circle" width="19" height="19"></i></div>
+        <div class="list-text"><h4 data-en="Turkey Room 🇹🇷">غرفة تركيا 🇹🇷</h4><span data-en="356 travelers active now">356 مسافر نشط الآن</span></div>
+        <div class="list-meta"><b>3</b><small data-en="new messages">رسالة جديدة</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CHAT ROOM ================= -->
+  <div class="screen" id="screen-chat">
+    <div class="wave-header" style="padding-bottom:22px; border-radius:0 0 24% 24%/0 0 26px 26px;">
+      <div class="top-row">
+        <div class="icon-btn" onclick="goToScreen('screen-trip')"><i data-lucide="arrow-right" width="17" height="17"></i></div>
+        <div>
+          <div class="brand-name" id="chatRoomName" style="font-size:14px;">غرفة الأرجنتين 🇦🇷</div>
+          <div class="brand-sub" id="chatRoomMeta" style="margin-top:2px;">214 · متصل الآن</div>
+        </div>
+        <div class="top-actions">
+          <button class="lang-btn" type="button" onclick="toggleLang()"><i data-lucide="globe" width="14" height="14"></i><span class="lang-btn-label">EN</span></button>
+          <div class="icon-btn theme-toggle-btn" onclick="toggleTheme()"><i data-lucide="moon" width="17" height="17"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="content chat-content" id="chatMessages" style="margin-top:-10px;"></div>
+
+    <div class="chat-input-bar">
+      <input type="text" id="chatInput" placeholder="اكتب رسالتك..." data-en-placeholder="Type a message...">
+      <button class="chat-send-btn" onclick="sendChatMessage()"><i data-lucide="send" width="17" height="17"></i></button>
     </div>
   </div>
 
@@ -672,6 +744,15 @@
       if(el.dataset.arValueCache === undefined) el.dataset.arValueCache = el.value;
       el.value = lang === 'ar' ? el.dataset.arValueCache : el.getAttribute('data-en-value');
     });
+
+    document.querySelectorAll('[data-en-placeholder]').forEach(el=>{
+      if(el.dataset.arPlaceholderCache === undefined) el.dataset.arPlaceholderCache = el.getAttribute('placeholder');
+      el.setAttribute('placeholder', lang === 'ar' ? el.dataset.arPlaceholderCache : el.getAttribute('data-en-placeholder'));
+    });
+
+    if(document.getElementById('screen-chat') && typeof chatRooms !== 'undefined'){
+      renderChatRoom(currentRoom, false);
+    }
 
     document.querySelectorAll('.lang-btn-label').forEach(l=>{
       l.textContent = lang === 'ar' ? 'EN' : 'AR';
@@ -714,23 +795,23 @@
     });
   });
 
+  function goToScreen(screenId){
+    document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+    const navMatch = document.querySelector('.nav-item[data-screen="'+screenId+'"]');
+    if(navMatch) navMatch.classList.add('active');
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    window.scrollTo(0,0);
+  }
+  window.goToScreen = goToScreen;
+
   document.querySelectorAll('.nav-item').forEach(item=>{
-    item.addEventListener('click', ()=>{
-      document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
-      item.classList.add('active');
-      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-      document.getElementById(item.dataset.screen).classList.add('active');
-      window.scrollTo(0,0);
-    });
+    item.addEventListener('click', ()=> goToScreen(item.dataset.screen));
   });
 
   // Tap a destination card to open its detail screen
   document.querySelectorAll('.dest-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-      document.getElementById('screen-detail').classList.add('active');
-      window.scrollTo(0,0);
-    });
+    card.addEventListener('click', ()=> goToScreen('screen-detail'));
   });
 
   // Generic tab toggles (mode-tabs)
@@ -749,6 +830,101 @@
       chip.classList.add('active');
     });
   });
+
+  // ---------- Chat rooms ----------
+  const chatRooms = {
+    argentina: {
+      name:'غرفة الأرجنتين 🇦🇷', nameEn:'Argentina Room 🇦🇷',
+      meta:'214 · متصل الآن', metaEn:'214 · online now',
+      messages:[
+        {who:'them', initials:'سارة', name:'سارة', nameEn:'Sara', text:'وصلت اليوم أوشوايا، الجو بارد بس المنظر خيالي 🥶🏔️', textEn:"Landed in Ushuaia today, freezing but the view is unreal 🥶🏔️", time:'10:02'},
+        {who:'them', initials:'يوسف', name:'يوسف', nameEn:'Youssef', text:'حد جرب رحلة Polar Latitude؟ مستاهلة السعر؟', textEn:'Anyone tried the Polar Latitude tour? Worth the price?', time:'10:05'},
+        {who:'me', text:'أيوه جربتها الأسبوع الماضي، تستاهل 100%', textEn:'Yes, did it last week — 100% worth it', time:'10:07'},
+        {who:'them', initials:'مايا', name:'مايا', nameEn:'Maya', text:'في مطعم حلال قريب من المرفأ حد يعرفه؟', textEn:'Any halal restaurant near the port anyone knows?', time:'10:11'},
+      ]
+    },
+    istanbul: {
+      name:'غرفة تركيا 🇹🇷', nameEn:'Turkey Room 🇹🇷',
+      meta:'356 · متصل الآن', metaEn:'356 · online now',
+      messages:[
+        {who:'them', initials:'عمر', name:'عمر', nameEn:'Omar', text:'صلاة الجمعة وين بالضبط بمنطقة السلطان أحمد؟', textEn:'Where exactly for Friday prayer near Sultanahmet?', time:'09:20'},
+        {who:'them', initials:'لينا', name:'لينا', nameEn:'Lina', text:'جامع السلطان أحمد نفسه قريب كتير من الفنادق', textEn:'The Sultan Ahmed mosque itself is very close to the hotels', time:'09:24'},
+        {who:'me', text:'شكراً! رايح بعد شوي', textEn:'Thanks! Heading there soon', time:'09:26'},
+      ]
+    }
+  };
+
+  let currentRoom = 'argentina';
+
+  function renderChatRoom(roomKey, navigate){
+    if(navigate === undefined) navigate = true;
+    currentRoom = roomKey;
+    const room = chatRooms[roomKey];
+    const nameEl = document.getElementById('chatRoomName');
+    const metaEl = document.getElementById('chatRoomMeta');
+    nameEl.textContent = currentLang === 'ar' ? room.name : room.nameEn;
+    metaEl.textContent = currentLang === 'ar' ? room.meta : room.metaEn;
+
+    const container = document.getElementById('chatMessages');
+    container.innerHTML = '';
+    room.messages.forEach(m=>{
+      container.appendChild(buildMessageEl(m));
+    });
+    if(navigate) goToScreen('screen-chat');
+  }
+
+  function buildMessageEl(m){
+    const row = document.createElement('div');
+    row.className = 'msg-row' + (m.who === 'me' ? ' own' : '');
+    if(m.who !== 'me'){
+      const avatar = document.createElement('div');
+      avatar.className = 'msg-avatar';
+      avatar.textContent = (currentLang === 'ar' ? m.name : m.nameEn).slice(0,1);
+      row.appendChild(avatar);
+    }
+    const col = document.createElement('div');
+    col.className = 'msg-col';
+    if(m.who !== 'me'){
+      const sender = document.createElement('div');
+      sender.className = 'msg-sender';
+      sender.textContent = currentLang === 'ar' ? m.name : m.nameEn;
+      col.appendChild(sender);
+    }
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.textContent = currentLang === 'ar' ? m.text : (m.textEn || m.text);
+    col.appendChild(bubble);
+    const time = document.createElement('div');
+    time.className = 'msg-time';
+    time.textContent = m.time;
+    col.appendChild(time);
+    row.appendChild(col);
+    return row;
+  }
+
+  document.querySelectorAll('.chat-room-trigger').forEach(card=>{
+    card.addEventListener('click', ()=> renderChatRoom(card.dataset.room));
+  });
+
+  function sendChatMessage(){
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if(!text) return;
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    chatRooms[currentRoom].messages.push({who:'me', text:text, textEn:text, time:time});
+    document.getElementById('chatMessages').appendChild(
+      buildMessageEl({who:'me', text:text, textEn:text, time:time})
+    );
+    input.value = '';
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+  window.sendChatMessage = sendChatMessage;
+
+  document.getElementById('chatInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ sendChatMessage(); }
+  });
+
 </script>
 </body>
 </html>
