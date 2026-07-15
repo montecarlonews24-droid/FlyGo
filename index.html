@@ -280,6 +280,32 @@
     background:#fff; box-shadow:0 4px 10px -2px rgba(10,61,82,.4); cursor:pointer;
   }
 
+  /* Search: country info card */
+  .country-info-card{display:none; padding:16px; margin-bottom:14px;}
+  .country-info-card.show{display:block;}
+  .country-info-head{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+  .country-info-flag{font-size:34px; line-height:1; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));}
+  .country-info-head h3{margin:0; font-size:16px; color:var(--ink);}
+  .country-info-head span{font-size:11px; color:var(--ink-soft); font-weight:700;}
+  .country-info-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;}
+  .country-info-stat{display:flex; align-items:center; gap:8px; background:var(--sand); border-radius:12px; padding:9px 10px;}
+  .country-info-stat i{color:var(--ocean); flex-shrink:0;}
+  .country-info-stat b{display:block; font-size:12px; color:var(--ink); font-family:'Cairo',sans-serif; font-weight:800; line-height:1.3;}
+  .country-info-stat small{font-size:9.5px; color:var(--ink-soft);}
+  .country-info-time-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(135deg,var(--deep-navy),var(--ocean));
+    border-radius:14px; padding:12px 10px; color:#fff;
+  }
+  .country-info-time{text-align:center; flex:1; min-width:0;}
+  .country-info-time span{display:block; font-size:9px; opacity:.82; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .country-info-time b{font-family:'Cairo',sans-serif; font-size:15px; font-weight:800;}
+  .country-info-time-diff{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    font-size:9px; font-weight:800; padding:0 8px; flex-shrink:0; opacity:.95;
+  }
+  .country-info-note{font-size:9.5px; color:var(--ink-soft); text-align:center; margin-top:10px;}
+
   /* Booking Hub */
   .booking-search-row{display:flex; gap:8px; margin-bottom:14px;}
   .booking-search-row .search-bar{flex:1; margin-bottom:0;}
@@ -1070,7 +1096,8 @@
     <div class="content" style="margin-top:-18px">
       <div class="search-bar">
         <i data-lucide="search" width="17" height="17"></i>
-        <input type="text" id="searchInput" placeholder="اكتب اسم منطقة أو حي…" data-en-placeholder="Type a region or district…" oninput="renderSearchResults()">
+        <input type="text" id="searchInput" list="countryDatalist" placeholder="اكتب اسم منطقة أو حي…" data-en-placeholder="Type a region or district…" oninput="renderSearchResults(); tryShowCountryInfo();">
+        <datalist id="countryDatalist"></datalist>
       </div>
 
       <!-- Search scope: continent / country / region / street -->
@@ -1079,6 +1106,58 @@
         <div class="mode-tab" data-scope="country" data-en="Country">دولة</div>
         <div class="mode-tab active" data-scope="region" data-en="Region">منطقة</div>
         <div class="mode-tab" data-scope="street" data-en="Street">شارع</div>
+      </div>
+
+      <!-- Country info card: shown when scope = country and a known country is typed -->
+      <div class="country-info-card filter-card" id="countryInfoCard">
+        <div class="country-info-head">
+          <span class="country-info-flag" id="countryInfoFlag">🏳️</span>
+          <div>
+            <h3 id="countryInfoName">—</h3>
+            <span id="countryInfoContinent">—</span>
+          </div>
+        </div>
+        <div class="country-info-grid">
+          <div class="country-info-stat">
+            <i data-lucide="landmark" width="15" height="15"></i>
+            <div><b id="countryInfoCapital">—</b><small data-en="Capital">العاصمة</small></div>
+          </div>
+          <div class="country-info-stat">
+            <i data-lucide="users" width="15" height="15"></i>
+            <div><b id="countryInfoPopulation">—</b><small data-en="Population">عدد السكان</small></div>
+          </div>
+          <div class="country-info-stat">
+            <i data-lucide="languages" width="15" height="15"></i>
+            <div><b id="countryInfoLanguage">—</b><small data-en="Language">اللغة</small></div>
+          </div>
+          <div class="country-info-stat">
+            <i data-lucide="coins" width="15" height="15"></i>
+            <div><b id="countryInfoCurrency">—</b><small data-en="Currency">العملة</small></div>
+          </div>
+          <div class="country-info-stat">
+            <i data-lucide="map" width="15" height="15"></i>
+            <div><b id="countryInfoArea">—</b><small data-en="Area">المساحة</small></div>
+          </div>
+          <div class="country-info-stat">
+            <i data-lucide="thermometer" width="15" height="15"></i>
+            <div><b id="countryInfoTemp">—</b><small data-en="Typical temperature">حرارة نموذجية</small></div>
+          </div>
+        </div>
+        <div class="country-info-time-row">
+          <div class="country-info-time">
+            <span data-en="Your time">وقتك الحالي</span>
+            <b id="countryInfoLocalTime">--:--</b>
+          </div>
+          <div class="country-info-time-diff">
+            <i data-lucide="arrow-right-left" width="14" height="14"></i>
+            <span id="countryInfoDiff">—</span>
+          </div>
+          <div class="country-info-time">
+            <span id="countryInfoNameShort">—</span>
+            <b id="countryInfoDestTime">--:--</b>
+          </div>
+        </div>
+        <p class="country-info-note" data-en="Time is live · population, area, and temperature are typical figures">الوقت مباشر · عدد السكان والمساحة والحرارة أرقام تقريبية نموذجية</p>
       </div>
 
       <!-- Category filters (multi-select) -->
@@ -1363,6 +1442,8 @@
   function toggleLang(){
     applyLang(currentLang === 'ar' ? 'en' : 'ar');
     populateCountrySelects();
+    if(typeof populateCountryDatalist === 'function') populateCountryDatalist();
+    if(typeof tryShowCountryInfo === 'function') tryShowCountryInfo();
   }
   window.toggleLang = toggleLang;
 
@@ -1637,7 +1718,9 @@
     street:{ar:'اكتب اسم شارع… مثل الشانزليزيه', en:'Type a street… e.g. Champs-Élysées'}
   };
 
+  let searchScope = 'region';
   function setSearchScope(scope){
+    searchScope = scope;
     document.querySelectorAll('#searchScopeTabs .mode-tab').forEach(t=>{
       t.classList.toggle('active', t.dataset.scope === scope);
     });
@@ -1648,6 +1731,7 @@
       input.dataset.arPlaceholderCache = ph.ar;
       input.setAttribute('placeholder', currentLang === 'ar' ? ph.ar : ph.en);
     }
+    tryShowCountryInfo();
   }
   window.setSearchScope = setSearchScope;
 
@@ -1753,6 +1837,148 @@
     renderSearchResults();
   }
   window.resetSearchFilters = resetSearchFilters;
+
+  // ---------- Country info: geography + live time comparison ----------
+  // capitalAr/En, continentAr/En, population/populationEn, languageAr/En,
+  // currencyAr/En, area/areaEn, tz (IANA zone for the capital), temp (typical
+  // average °C, illustrative — not live weather), icon (lucide weather glyph).
+  const COUNTRY_DETAILS = {
+    FR:{capitalAr:'باريس',capitalEn:'Paris',continentAr:'أوروبا',continentEn:'Europe',population:'68 مليون',populationEn:'68M',languageAr:'الفرنسية',languageEn:'French',currencyAr:'يورو (EUR)',currencyEn:'Euro (EUR)',area:'551,695 كم²',areaEn:'551,695 km²',tz:'Europe/Paris',temp:16,icon:'cloud-sun'},
+    AE:{capitalAr:'أبوظبي',capitalEn:'Abu Dhabi',continentAr:'آسيا',continentEn:'Asia',population:'10 ملايين',populationEn:'10M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'درهم إماراتي (AED)',currencyEn:'UAE Dirham (AED)',area:'83,600 كم²',areaEn:'83,600 km²',tz:'Asia/Dubai',temp:34,icon:'sun'},
+    SA:{capitalAr:'الرياض',capitalEn:'Riyadh',continentAr:'آسيا',continentEn:'Asia',population:'36 مليون',populationEn:'36M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'ريال سعودي (SAR)',currencyEn:'Saudi Riyal (SAR)',area:'2,150,000 كم²',areaEn:'2,150,000 km²',tz:'Asia/Riyadh',temp:38,icon:'sun'},
+    QA:{capitalAr:'الدوحة',capitalEn:'Doha',continentAr:'آسيا',continentEn:'Asia',population:'2.7 مليون',populationEn:'2.7M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'ريال قطري (QAR)',currencyEn:'Qatari Riyal (QAR)',area:'11,586 كم²',areaEn:'11,586 km²',tz:'Asia/Qatar',temp:36,icon:'sun'},
+    KW:{capitalAr:'مدينة الكويت',capitalEn:'Kuwait City',continentAr:'آسيا',continentEn:'Asia',population:'4.3 مليون',populationEn:'4.3M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'دينار كويتي (KWD)',currencyEn:'Kuwaiti Dinar (KWD)',area:'17,818 كم²',areaEn:'17,818 km²',tz:'Asia/Kuwait',temp:37,icon:'sun'},
+    BH:{capitalAr:'المنامة',capitalEn:'Manama',continentAr:'آسيا',continentEn:'Asia',population:'1.5 مليون',populationEn:'1.5M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'دينار بحريني (BHD)',currencyEn:'Bahraini Dinar (BHD)',area:'786 كم²',areaEn:'786 km²',tz:'Asia/Bahrain',temp:35,icon:'sun'},
+    OM:{capitalAr:'مسقط',capitalEn:'Muscat',continentAr:'آسيا',continentEn:'Asia',population:'4.6 مليون',populationEn:'4.6M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'ريال عماني (OMR)',currencyEn:'Omani Rial (OMR)',area:'309,500 كم²',areaEn:'309,500 km²',tz:'Asia/Muscat',temp:33,icon:'sun'},
+    EG:{capitalAr:'القاهرة',capitalEn:'Cairo',continentAr:'أفريقيا',continentEn:'Africa',population:'106 مليون',populationEn:'106M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'جنيه مصري (EGP)',currencyEn:'Egyptian Pound (EGP)',area:'1,010,000 كم²',areaEn:'1,010,000 km²',tz:'Africa/Cairo',temp:28,icon:'sun'},
+    JO:{capitalAr:'عمّان',capitalEn:'Amman',continentAr:'آسيا',continentEn:'Asia',population:'11 مليون',populationEn:'11M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'دينار أردني (JOD)',currencyEn:'Jordanian Dinar (JOD)',area:'89,342 كم²',areaEn:'89,342 km²',tz:'Asia/Amman',temp:25,icon:'sun'},
+    LB:{capitalAr:'بيروت',capitalEn:'Beirut',continentAr:'آسيا',continentEn:'Asia',population:'5.5 مليون',populationEn:'5.5M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'ليرة لبنانية (LBP)',currencyEn:'Lebanese Pound (LBP)',area:'10,452 كم²',areaEn:'10,452 km²',tz:'Asia/Beirut',temp:24,icon:'sun'},
+    MA:{capitalAr:'الرباط',capitalEn:'Rabat',continentAr:'أفريقيا',continentEn:'Africa',population:'37 مليون',populationEn:'37M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'درهم مغربي (MAD)',currencyEn:'Moroccan Dirham (MAD)',area:'446,550 كم²',areaEn:'446,550 km²',tz:'Africa/Casablanca',temp:22,icon:'cloud-sun'},
+    TN:{capitalAr:'تونس',capitalEn:'Tunis',continentAr:'أفريقيا',continentEn:'Africa',population:'12 مليون',populationEn:'12M',languageAr:'العربية',languageEn:'Arabic',currencyAr:'دينار تونسي (TND)',currencyEn:'Tunisian Dinar (TND)',area:'163,610 كم²',areaEn:'163,610 km²',tz:'Africa/Tunis',temp:23,icon:'sun'},
+    TR:{capitalAr:'أنقرة',capitalEn:'Ankara',continentAr:'آسيا',continentEn:'Asia',population:'85 مليون',populationEn:'85M',languageAr:'التركية',languageEn:'Turkish',currencyAr:'ليرة تركية (TRY)',currencyEn:'Turkish Lira (TRY)',area:'783,562 كم²',areaEn:'783,562 km²',tz:'Europe/Istanbul',temp:20,icon:'cloud-sun'},
+    GB:{capitalAr:'لندن',capitalEn:'London',continentAr:'أوروبا',continentEn:'Europe',population:'68 مليون',populationEn:'68M',languageAr:'الإنجليزية',languageEn:'English',currencyAr:'جنيه إسترليني (GBP)',currencyEn:'Pound Sterling (GBP)',area:'243,610 كم²',areaEn:'243,610 km²',tz:'Europe/London',temp:14,icon:'cloud'},
+    DE:{capitalAr:'برلين',capitalEn:'Berlin',continentAr:'أوروبا',continentEn:'Europe',population:'84 مليون',populationEn:'84M',languageAr:'الألمانية',languageEn:'German',currencyAr:'يورو (EUR)',currencyEn:'Euro (EUR)',area:'357,592 كم²',areaEn:'357,592 km²',tz:'Europe/Berlin',temp:14,icon:'cloud'},
+    IT:{capitalAr:'روما',capitalEn:'Rome',continentAr:'أوروبا',continentEn:'Europe',population:'59 مليون',populationEn:'59M',languageAr:'الإيطالية',languageEn:'Italian',currencyAr:'يورو (EUR)',currencyEn:'Euro (EUR)',area:'301,340 كم²',areaEn:'301,340 km²',tz:'Europe/Rome',temp:18,icon:'sun'},
+    ES:{capitalAr:'مدريد',capitalEn:'Madrid',continentAr:'أوروبا',continentEn:'Europe',population:'48 مليون',populationEn:'48M',languageAr:'الإسبانية',languageEn:'Spanish',currencyAr:'يورو (EUR)',currencyEn:'Euro (EUR)',area:'505,990 كم²',areaEn:'505,990 km²',tz:'Europe/Madrid',temp:19,icon:'sun'},
+    NL:{capitalAr:'أمستردام',capitalEn:'Amsterdam',continentAr:'أوروبا',continentEn:'Europe',population:'18 مليون',populationEn:'18M',languageAr:'الهولندية',languageEn:'Dutch',currencyAr:'يورو (EUR)',currencyEn:'Euro (EUR)',area:'41,850 كم²',areaEn:'41,850 km²',tz:'Europe/Amsterdam',temp:13,icon:'cloud'},
+    CH:{capitalAr:'برن',capitalEn:'Bern',continentAr:'أوروبا',continentEn:'Europe',population:'8.8 مليون',populationEn:'8.8M',languageAr:'الألمانية/الفرنسية',languageEn:'German/French',currencyAr:'فرنك سويسري (CHF)',currencyEn:'Swiss Franc (CHF)',area:'41,285 كم²',areaEn:'41,285 km²',tz:'Europe/Zurich',temp:11,icon:'cloud'},
+    JP:{capitalAr:'طوكيو',capitalEn:'Tokyo',continentAr:'آسيا',continentEn:'Asia',population:'124 مليون',populationEn:'124M',languageAr:'اليابانية',languageEn:'Japanese',currencyAr:'ين ياباني (JPY)',currencyEn:'Japanese Yen (JPY)',area:'377,975 كم²',areaEn:'377,975 km²',tz:'Asia/Tokyo',temp:17,icon:'cloud-sun'},
+    CN:{capitalAr:'بكين',capitalEn:'Beijing',continentAr:'آسيا',continentEn:'Asia',population:'1.41 مليار',populationEn:'1.41B',languageAr:'الصينية',languageEn:'Mandarin Chinese',currencyAr:'يوان صيني (CNY)',currencyEn:'Chinese Yuan (CNY)',area:'9,596,960 كم²',areaEn:'9,596,960 km²',tz:'Asia/Shanghai',temp:15,icon:'cloud'},
+    KR:{capitalAr:'سيول',capitalEn:'Seoul',continentAr:'آسيا',continentEn:'Asia',population:'52 مليون',populationEn:'52M',languageAr:'الكورية',languageEn:'Korean',currencyAr:'وون كوري (KRW)',currencyEn:'South Korean Won (KRW)',area:'100,210 كم²',areaEn:'100,210 km²',tz:'Asia/Seoul',temp:13,icon:'cloud'},
+    IN:{capitalAr:'نيودلهي',capitalEn:'New Delhi',continentAr:'آسيا',continentEn:'Asia',population:'1.44 مليار',populationEn:'1.44B',languageAr:'الهندية/الإنجليزية',languageEn:'Hindi/English',currencyAr:'روبية هندية (INR)',currencyEn:'Indian Rupee (INR)',area:'3,287,263 كم²',areaEn:'3,287,263 km²',tz:'Asia/Kolkata',temp:28,icon:'sun'},
+    ID:{capitalAr:'جاكرتا',capitalEn:'Jakarta',continentAr:'آسيا',continentEn:'Asia',population:'280 مليون',populationEn:'280M',languageAr:'الإندونيسية',languageEn:'Indonesian',currencyAr:'روبية إندونيسية (IDR)',currencyEn:'Indonesian Rupiah (IDR)',area:'1,904,569 كم²',areaEn:'1,904,569 km²',tz:'Asia/Jakarta',temp:29,icon:'cloud-sun'},
+    MY:{capitalAr:'كوالالمبور',capitalEn:'Kuala Lumpur',continentAr:'آسيا',continentEn:'Asia',population:'34 مليون',populationEn:'34M',languageAr:'الملايو',languageEn:'Malay',currencyAr:'رينغيت ماليزي (MYR)',currencyEn:'Malaysian Ringgit (MYR)',area:'330,803 كم²',areaEn:'330,803 km²',tz:'Asia/Kuala_Lumpur',temp:29,icon:'cloud-rain'},
+    TH:{capitalAr:'بانكوك',capitalEn:'Bangkok',continentAr:'آسيا',continentEn:'Asia',population:'72 مليون',populationEn:'72M',languageAr:'التايلاندية',languageEn:'Thai',currencyAr:'بات تايلاندي (THB)',currencyEn:'Thai Baht (THB)',area:'513,120 كم²',areaEn:'513,120 km²',tz:'Asia/Bangkok',temp:30,icon:'sun'},
+    SG:{capitalAr:'سنغافورة',capitalEn:'Singapore',continentAr:'آسيا',continentEn:'Asia',population:'5.9 مليون',populationEn:'5.9M',languageAr:'الإنجليزية/الملايو/الماندرين',languageEn:'English/Malay/Mandarin',currencyAr:'دولار سنغافوري (SGD)',currencyEn:'Singapore Dollar (SGD)',area:'728 كم²',areaEn:'728 km²',tz:'Asia/Singapore',temp:28,icon:'cloud-sun'},
+    US:{capitalAr:'واشنطن العاصمة',capitalEn:'Washington, D.C.',continentAr:'أمريكا الشمالية',continentEn:'North America',population:'335 مليون',populationEn:'335M',languageAr:'الإنجليزية',languageEn:'English',currencyAr:'دولار أمريكي (USD)',currencyEn:'US Dollar (USD)',area:'9,833,517 كم²',areaEn:'9,833,517 km²',tz:'America/New_York',temp:16,icon:'cloud-sun'},
+    CA:{capitalAr:'أوتاوا',capitalEn:'Ottawa',continentAr:'أمريكا الشمالية',continentEn:'North America',population:'39 مليون',populationEn:'39M',languageAr:'الإنجليزية/الفرنسية',languageEn:'English/French',currencyAr:'دولار كندي (CAD)',currencyEn:'Canadian Dollar (CAD)',area:'9,984,670 كم²',areaEn:'9,984,670 km²',tz:'America/Toronto',temp:10,icon:'cloud'},
+    BR:{capitalAr:'برازيليا',capitalEn:'Brasília',continentAr:'أمريكا الجنوبية',continentEn:'South America',population:'217 مليون',populationEn:'217M',languageAr:'البرتغالية',languageEn:'Portuguese',currencyAr:'ريال برازيلي (BRL)',currencyEn:'Brazilian Real (BRL)',area:'8,515,767 كم²',areaEn:'8,515,767 km²',tz:'America/Sao_Paulo',temp:24,icon:'sun'},
+    MX:{capitalAr:'مكسيكو سيتي',capitalEn:'Mexico City',continentAr:'أمريكا الشمالية',continentEn:'North America',population:'128 مليون',populationEn:'128M',languageAr:'الإسبانية',languageEn:'Spanish',currencyAr:'بيزو مكسيكي (MXN)',currencyEn:'Mexican Peso (MXN)',area:'1,964,375 كم²',areaEn:'1,964,375 km²',tz:'America/Mexico_City',temp:20,icon:'sun'},
+    AR:{capitalAr:'بوينس آيرس',capitalEn:'Buenos Aires',continentAr:'أمريكا الجنوبية',continentEn:'South America',population:'46 مليون',populationEn:'46M',languageAr:'الإسبانية',languageEn:'Spanish',currencyAr:'بيزو أرجنتيني (ARS)',currencyEn:'Argentine Peso (ARS)',area:'2,780,400 كم²',areaEn:'2,780,400 km²',tz:'America/Argentina/Buenos_Aires',temp:18,icon:'cloud-sun'},
+    AU:{capitalAr:'كانبرا',capitalEn:'Canberra',continentAr:'أوقيانوسيا',continentEn:'Oceania',population:'26 مليون',populationEn:'26M',languageAr:'الإنجليزية',languageEn:'English',currencyAr:'دولار أسترالي (AUD)',currencyEn:'Australian Dollar (AUD)',area:'7,692,024 كم²',areaEn:'7,692,024 km²',tz:'Australia/Sydney',temp:22,icon:'sun'},
+    ZA:{capitalAr:'بريتوريا',capitalEn:'Pretoria',continentAr:'أفريقيا',continentEn:'Africa',population:'60 مليون',populationEn:'60M',languageAr:'الإنجليزية وأخرى',languageEn:'English & others',currencyAr:'راند جنوب أفريقي (ZAR)',currencyEn:'South African Rand (ZAR)',area:'1,221,037 كم²',areaEn:'1,221,037 km²',tz:'Africa/Johannesburg',temp:19,icon:'sun'},
+    RU:{capitalAr:'موسكو',capitalEn:'Moscow',continentAr:'أوروبا وآسيا',continentEn:'Europe & Asia',population:'144 مليون',populationEn:'144M',languageAr:'الروسية',languageEn:'Russian',currencyAr:'روبل روسي (RUB)',currencyEn:'Russian Ruble (RUB)',area:'17,098,242 كم²',areaEn:'17,098,242 km²',tz:'Europe/Moscow',temp:9,icon:'cloud'}
+  };
+
+  function countryFlagEmoji(code){
+    return String.fromCodePoint(...code.split('').map(c => 127397 + c.charCodeAt(0)));
+  }
+
+  // Real UTC offset (in minutes) for an IANA timezone, right now — handles DST automatically.
+  function tzOffsetMinutes(timeZone){
+    const now = new Date();
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone, hour12:false,
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit', second:'2-digit'
+    });
+    const parts = dtf.formatToParts(now).reduce((acc,p)=>{ if(p.type !== 'literal') acc[p.type]=p.value; return acc; }, {});
+    const asUTC = Date.UTC(parts.year, parts.month-1, parts.day, parts.hour === '24' ? 0 : parts.hour, parts.minute, parts.second);
+    return Math.round((asUTC - now.getTime()) / 60000);
+  }
+
+  function formatClock(timeZone){
+    return new Intl.DateTimeFormat(currentLang === 'ar' ? 'ar-u-nu-latn' : 'en-US', {
+      timeZone, hour:'2-digit', minute:'2-digit', hour12:true
+    }).format(new Date());
+  }
+
+  function formatTimeDiff(diffMinutes){
+    if(diffMinutes === 0) return {ar:'نفس توقيتك', en:'Same time as you'};
+    const sign = diffMinutes > 0 ? '+' : '−';
+    const abs = Math.abs(diffMinutes);
+    const h = Math.floor(abs/60), m = abs%60;
+    const ar = sign + (h ? (h + (h===1?' ساعة':' ساعات')) : '') + (m ? (h?' ':'') + m + ' د' : '');
+    const en = sign + (h ? h+'h' : '') + (m ? (h?' ':'')+m+'m' : '');
+    return {ar, en};
+  }
+
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  let activeCountryInfo = null; // { code, details } while the card is visible
+
+  function updateCountryInfoTimes(){
+    if(!activeCountryInfo) return;
+    document.getElementById('countryInfoLocalTime').textContent = formatClock(userTimeZone);
+    document.getElementById('countryInfoDestTime').textContent = formatClock(activeCountryInfo.details.tz);
+    const diff = formatTimeDiff(tzOffsetMinutes(activeCountryInfo.details.tz) - tzOffsetMinutes(userTimeZone));
+    document.getElementById('countryInfoDiff').textContent = currentLang === 'ar' ? diff.ar : diff.en;
+  }
+
+  function findCountryMatch(query){
+    const q = query.trim().toLowerCase();
+    if(q.length < 2) return null;
+    return COUNTRIES.find(c =>
+      (COUNTRY_DETAILS[c.code]) && (c.en.toLowerCase().includes(q) || c.ar.includes(query.trim()))
+    ) || null;
+  }
+
+  function tryShowCountryInfo(){
+    const card = document.getElementById('countryInfoCard');
+    const input = document.getElementById('searchInput');
+    if(!card || !input) return;
+    if(searchScope !== 'country'){
+      card.classList.remove('show');
+      activeCountryInfo = null;
+      return;
+    }
+    const match = findCountryMatch(input.value);
+    if(!match){
+      card.classList.remove('show');
+      activeCountryInfo = null;
+      return;
+    }
+    const d = COUNTRY_DETAILS[match.code];
+    activeCountryInfo = {code:match.code, details:d};
+
+    document.getElementById('countryInfoFlag').textContent = countryFlagEmoji(match.code);
+    document.getElementById('countryInfoName').textContent = currentLang === 'ar' ? match.ar : match.en;
+    document.getElementById('countryInfoNameShort').textContent = currentLang === 'ar' ? match.ar : match.en;
+    document.getElementById('countryInfoContinent').textContent = currentLang === 'ar' ? d.continentAr : d.continentEn;
+    document.getElementById('countryInfoCapital').textContent = currentLang === 'ar' ? d.capitalAr : d.capitalEn;
+    document.getElementById('countryInfoPopulation').textContent = currentLang === 'ar' ? d.population : d.populationEn;
+    document.getElementById('countryInfoLanguage').textContent = currentLang === 'ar' ? d.languageAr : d.languageEn;
+    document.getElementById('countryInfoCurrency').textContent = currentLang === 'ar' ? d.currencyAr : d.currencyEn;
+    document.getElementById('countryInfoArea').textContent = currentLang === 'ar' ? d.area : d.areaEn;
+    document.getElementById('countryInfoTemp').textContent = d.temp + '°C';
+
+    updateCountryInfoTimes();
+    card.classList.add('show');
+    lucide.createIcons();
+  }
+  window.tryShowCountryInfo = tryShowCountryInfo;
+
+  setInterval(updateCountryInfoTimes, 30000);
+
+  function populateCountryDatalist(){
+    const list = document.getElementById('countryDatalist');
+    if(!list) return;
+    const sorted = [...COUNTRIES].sort((a,b)=>
+      currentLang === 'ar' ? a.ar.localeCompare(b.ar,'ar') : a.en.localeCompare(b.en)
+    );
+    list.innerHTML = sorted.map(c=> '<option value="' + (currentLang === 'ar' ? c.ar : c.en) + '">').join('');
+  }
+  window.populateCountryDatalist = populateCountryDatalist;
+
 
   function goToScreen(screenId){
     document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
@@ -2774,6 +3000,7 @@
   // English is now the app's primary/default language.
   applyLang('en');
   populateCountrySelects();
+  populateCountryDatalist();
   renderSearchResults();
 
 </script>
