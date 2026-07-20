@@ -1257,7 +1257,7 @@
           </a>
         </div>
 
-        <p class="country-info-note" data-en="Live data from REST Countries &amp; Open-Meteo · verify emergency and embassy numbers with an official source before you travel">بيانات حية من REST Countries و Open-Meteo · تأكد من أرقام الطوارئ والسفارة عبر مصدر رسمي قبل السفر</p>
+        <p class="country-info-note" data-en="Country data: mledoze/countries (open dataset) · Weather: Open-Meteo · verify emergency and embassy numbers with an official source before you travel">بيانات الدول: mledoze/countries (قاعدة بيانات مفتوحة) · الطقس: Open-Meteo · تأكد من أرقام الطوارئ والسفارة عبر مصدر رسمي قبل السفر</p>
       </div>
 
       <!-- Category filters (multi-select) -->
@@ -1869,6 +1869,16 @@
     const listEl = document.getElementById('searchResultsList');
     const titleEl = document.getElementById('searchResultsTitle');
 
+    if(searchScope === 'country' || searchScope === 'continent'){
+      setLocalizedText(titleEl, 'أماكن قريبة', 'Nearby places');
+      listEl.innerHTML = '<div class="booking-state"><i data-lucide="map-pin" width="24" height="24"></i><span>' +
+        (currentLang === 'ar'
+          ? 'البحث عن أماكن حقيقية قريبة بيشتغل أدق مع "منطقة" أو "شارع" — دولة كاملة مساحتها كبيرة كتير لبحث قريب'
+          : 'Real nearby-places search works best with "Region" or "Street" — a whole country is too large an area for a nearby search') +
+        '</span></div>';
+      return;
+    }
+
     if(!query || query.length < 3){
       setLocalizedText(titleEl, 'اكتب مكان للبحث', 'Type a place to search');
       listEl.innerHTML = '<div class="booking-state"><i data-lucide="map-pin" width="24" height="24"></i><span>' +
@@ -2127,12 +2137,12 @@
   // capitalAr/En, continentAr/En, population/populationEn, languageAr/En,
   // currencyAr/En, area/areaEn, tz (IANA zone for the capital), temp (typical
   // average °C, illustrative — not live weather), icon (lucide weather glyph).
-  // Country facts now come live from the REST Countries API (free, no key) —
-  // works for every country, not just a curated list. Weather comes live
-  // from Open-Meteo (free, no key). Small dictionaries below are just
-  // translations of standard geography terms (continent/language names),
-  // not fabricated facts, and fall back to the API's English text when a
-  // term isn't in the dictionary.
+  // Country facts come from an open, static country dataset (see
+  // loadCountriesDataset below) — works for every country, not just a
+  // curated list. Weather comes live from Open-Meteo (free, no key). Small
+  // dictionaries below are just translations of standard geography terms
+  // (continent/language names), not fabricated facts, and fall back to the
+  // dataset's English text when a term isn't in the dictionary.
   const REGION_AR = {
     Europe:'أوروبا', Asia:'آسيا', Africa:'أفريقيا', Americas:'الأمريكتان',
     Oceania:'أوقيانوسيا', Antarctic:'القارة القطبية الجنوبية', Polar:'القطب'
@@ -2158,14 +2168,29 @@
   };
 
   const countryDataCache = {};
+  let countriesDatasetPromise = null;
+  // Country facts come from the mledoze/countries open dataset (the same
+  // open-licensed source restcountries.com's own API is built from),
+  // fetched once as a static JSON file from jsDelivr's CDN. No API key,
+  // no per-country rate limits, and no dependency on a small hosted API's
+  // uptime — restcountries.com's older keyless endpoints have become
+  // unreliable as that project moves to a paid/keyed v5 API.
+  function loadCountriesDataset(){
+    if(!countriesDatasetPromise){
+      countriesDatasetPromise = fetch('https://cdn.jsdelivr.net/gh/mledoze/countries@master/countries.json')
+        .then(res=>{ if(!res.ok) throw new Error('countries dataset failed'); return res.json(); })
+        .catch(err=>{ countriesDatasetPromise = null; throw err; }); // allow retry on next lookup if this attempt failed
+    }
+    return countriesDatasetPromise;
+  }
+
   async function fetchCountryData(code){
     if(countryDataCache[code]) return countryDataCache[code];
-    const res = await fetch('https://restcountries.com/v3.1/alpha/' + code +
-      '?fields=capital,region,population,area,languages,currencies,timezones,capitalInfo,latlng');
-    if(!res.ok) throw new Error('country lookup failed');
-    const data = await res.json();
-    countryDataCache[code] = data;
-    return data;
+    const list = await loadCountriesDataset();
+    const entry = list.find(c => c.cca2 === code);
+    if(!entry) throw new Error('country not found in dataset');
+    countryDataCache[code] = entry;
+    return entry;
   }
 
   async function fetchTemperature(lat, lon){
@@ -3064,7 +3089,7 @@
   buildReelsStrip();
 
   // ---------- Booking Hub (live hotel search via proxy) ----------
-  const BOOKING_PROXY = 'https://compass-voyager-api.montecarlo-news24.workers.dev/api/hotels';
+  const BOOKING_PROXY = 'https://flygotravel.vercel.app/api/hotels';
   let bookingSearchToken = 0;
   let bookingDestinations = [];
   let bookingSelectedDestination = null; // { regionId, name }
